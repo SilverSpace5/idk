@@ -1,0 +1,36 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://Background.tres" type="TileSet" id=1]
+[ext_resource path="res://Scripts/Item.gd" type="Script" id=2]
+
+[sub_resource type="RectangleShape2D" id=1]
+extents = Vector2( 8, 8 )
+
+[node name="Item" type="RigidBody2D"]
+visible = false
+gravity_scale = 5.0
+contact_monitor = true
+can_sleep = false
+script = ExtResource( 2 )
+
+[node name="Item" type="Area2D" parent="."]
+scale = Vector2( 2, 2 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Item"]
+shape = SubResource( 1 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+scale = Vector2( 2, 2 )
+shape = SubResource( 1 )
+
+[node name="Sprite" type="TileMap" parent="."]
+position = Vector2( 16, 16 )
+scale = Vector2( 2, 2 )
+z_index = 1
+tile_set = ExtResource( 1 )
+cell_size = Vector2( 16, 16 )
+format = 1
+tile_data = PoolIntArray( -1, 0, 0 )
+
+[connection signal="body_entered" from="Item" to="." method="_on_Item_body_entered"]
+[connection signal="body_exited" from="Item" to="." method="_on_Item_body_exited"]
