@@ -1,7 +1,6 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://World.tres" type="TileSet" id=1]
-[ext_resource path="res://Player.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Scripts/Game.gd" type="Script" id=3]
 [ext_resource path="res://Assets/default.tres" type="DynamicFont" id=4]
 [ext_resource path="res://Slot.tscn" type="PackedScene" id=5]
@@ -59,9 +58,6 @@ modulate = Color( 0.709804, 0.980392, 1, 1 )
 scale = Vector2( 1024, 600 )
 z_index = -5
 mesh = SubResource( 2 )
-
-[node name="Player" parent="." instance=ExtResource( 2 )]
-scale = Vector2( 3, 3 )
 
 [node name="MouseSelect" type="MeshInstance2D" parent="."]
 modulate = Color( 1, 1, 1, 0.247059 )

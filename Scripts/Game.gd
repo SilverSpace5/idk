@@ -243,13 +243,13 @@ func _process(delta):
 				itemNew.item = oldBlock
 				itemNew.position = mp*64 + Vector2(32, 32)
 			
-#			if saving:
-#				Network.sendMsg({"databaseset": Global.encode(getWorldList(borderMin, borderMax)), "databaseid": "world"})
-
 func _ready():
 	$MeshInstance2D.scale = Vector2(99999999, 99999999)
-	Global.player = $Player
 	
+	if Network.databaseData.has("pos"):
+		Global.player = Network.instance_player(Network.id, Vector2(Network.databaseData["pos"][0], Network.databaseData["pos"][1]))
+	else:
+		Global.player = Network.instance_player(Network.id)
 	borderMax.x += 1
 	borderMax.y += 1
 	

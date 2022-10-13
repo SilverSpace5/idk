@@ -175,7 +175,7 @@ func _process(delta):
 func _exit_tree():
 	peer.disconnect_from_host()
 
-func instance_player(id) -> Object:
-	var player_instance = Global.instance_node_at_location(player, Players, Vector2(512, 300))
+func instance_player(id, pos=Vector2(0, 0)) -> Object:
+	var player_instance = Global.instance_node_at_location(player, Players, pos)
 	player_instance.name = str(id)
 	return player_instance

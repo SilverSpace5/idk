@@ -10,6 +10,7 @@ extents = Vector2( 8, 8 )
 extents = Vector2( 8, 0.5 )
 
 [node name="Player" type="KinematicBody2D"]
+scale = Vector2( 3, 3 )
 script = ExtResource( 2 )
 speed = 400
 jumpSpeed = 500
@@ -29,3 +30,10 @@ shape = SubResource( 1 )
 modulate = Color( 0, 1, 0.133333, 1 )
 position = Vector2( 0, 8.5 )
 shape = SubResource( 2 )
+
+[node name="Tween" type="Tween" parent="."]
+
+[node name="tick_rate" type="Timer" parent="."]
+wait_time = 0.03
+
+[connection signal="timeout" from="tick_rate" to="." method="_on_tick_rate_timeout"]
