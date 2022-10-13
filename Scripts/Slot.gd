@@ -4,6 +4,15 @@ export (bool) var isHotbar = false
 export (int) var item = 0
 export (int) var amount = 1
 
+var ready = false
+
+func _ready():
+	if isHotbar:
+		yield(get_tree().create_timer(0.1), "timeout")
+		item = Global.scene.hotbar[int(name[4])-1]
+		amount = Global.scene.hotbarAmount[int(name[4])-1]
+	ready = true
+
 func _process(delta):
 	for i in range(5):
 		if item == i+24:
@@ -30,7 +39,9 @@ func _process(delta):
 		$CanvasLayer/Amount.text = ""
 	
 	if isHotbar:
-		Global.scene.hotbar[int(name[4])-1] = item
+		if ready:
+			Global.scene.hotbar[int(name[4])-1] = item
+			Global.scene.hotbarAmount[int(name[4])-1] = amount
 		Global.scene.hotbarSlots[int(name[4])-1] = self
 		if int(name[4]) == Global.scene.selectedSlot:
 			scale = Vector2(4.4, 4.4)

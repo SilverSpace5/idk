@@ -11,6 +11,7 @@ extents = Vector2( 8, 0.5 )
 
 [node name="Player" type="KinematicBody2D"]
 scale = Vector2( 3, 3 )
+z_index = 1
 script = ExtResource( 2 )
 speed = 400
 jumpSpeed = 500
@@ -32,8 +33,11 @@ position = Vector2( 0, 8.5 )
 shape = SubResource( 2 )
 
 [node name="Tween" type="Tween" parent="."]
+playback_speed = 1.5
+playback/speed = 1.5
 
 [node name="tick_rate" type="Timer" parent="."]
 wait_time = 0.03
+autostart = true
 
 [connection signal="timeout" from="tick_rate" to="." method="_on_tick_rate_timeout"]

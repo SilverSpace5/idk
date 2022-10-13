@@ -43,9 +43,9 @@ func _process(delta):
 	
 	found -= delta
 	
-	if position.distance_to(Global.player.position) < 250:
+	if position.distance_to(Global.player.position) < 300:
 		found = 1
-		if position.distance_to(Global.player.position) < 150:
+		if position.distance_to(Global.player.position) < 200:
 			collision_layer = 4
 			collision_mask = 4
 		else:
@@ -55,11 +55,14 @@ func _process(delta):
 	elif found < 0:
 		collision_layer = 1
 		collision_mask = 1
+	if position.distance_to(Global.player.position) < 25:
+		collision_layer = Global.player.collision_layer
+		collision_mask = Global.player.collision_mask
 
 func _on_Item_body_entered(body):
-	if body.name == "Player":
+	if body.name == Network.id:
 		pickingUp = true
 		
 func _on_Item_body_exited(body):
-	if body.name == "Player":
+	if body.name == Network.id:
 		pickingUp = false

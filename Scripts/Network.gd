@@ -54,7 +54,6 @@ func sendMsg(data, wait=false):
 		while not gotData:
 			yield(get_tree().create_timer(0.1), "timeout")
 		return returnData
-		
 
 func updateDatabaseData(id):
 	sendMsg({"databaseset": databaseData, "databaseid": id})
@@ -137,13 +136,15 @@ func _on_data():
 			returnData = data["databaselist"]
 		if data.has("joingame"):
 			playerJoinGame(data["joingame"])
+		if data.has("leavegame"):
+			playerLeaveGame(data["leavegame"])
 		if data.has("setBlock"):
 			for setBlock in data["setBlock"]:
 				var block = int(setBlock[1])
 				var pos = Global.scene.borderMin + Vector2(int(setBlock[0][0]), int(setBlock[0][1]))
-				Global.scene.setBlock(pos, block, false)
+				Global.scene.setBlock(pos, block, true, false)
 #				if Global.scene.borderMin.x < 0:
-#					p
+#					
 #				var pos = Vector2(setBlock[0][])
 	
 

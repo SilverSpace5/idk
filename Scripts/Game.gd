@@ -5,7 +5,8 @@ var frameTimer = 0
 var nearbyBlockTimer = 99
 var selectedSlot = 1
 var lastPlaced = -2
-var hotbar = [0, 0, 0, 0, 0]
+var hotbar = [-1, -1, -1, -1, -1]
+var hotbarAmount = [0, 0, 0, 0, 0]
 var hotbarSlots = [null, null, null, null, null]
 var hotbarCooldown = [0, 0, 0, 0, 0]
 var item = load("res://Item.tscn")
@@ -80,11 +81,11 @@ func worldUpdated():
 	for tilePos in getBlocks(1):
 		if abs(playerPos.x - tilePos.x*64) < screenWidth and abs(playerPos.y - tilePos.y*64) < screenHeight:
 			if $World.get_cell(tilePos.x, tilePos.y - 1) == -1:
-				setBlock(tilePos, 5)
+				setBlock(tilePos, 5, true, false)
 	for tilePos in getBlocks(5):
 		if abs(playerPos.x - tilePos.x*64) < screenWidth and abs(playerPos.y - tilePos.y*64) < screenHeight:
 			if $World.get_cell(tilePos.x, tilePos.y - 1) != -1:
-				setBlock(tilePos, 1)
+				setBlock(tilePos, 1, true, false)
 
 func getWorld():
 	var worldMap = []
@@ -98,7 +99,7 @@ func setWorld(worldMap):
 	for block in worldMap:
 		$World.set_cell(block[0][0], block[0][1], block[1])
 
-func setBlock(pos, id, important=true):
+func setBlock(pos, id, important=true, send=true):
 	if pos.x >= borderMin.x and pos.x <= borderMax.x and pos.y >= borderMin.y and pos.y <= borderMax.y:
 		pass
 	else:
@@ -114,10 +115,11 @@ func setBlock(pos, id, important=true):
 		$WorldDarker.set_cellv(pos, -1)
 	if important:
 		updateNearbyBlocks()
-		if borderMin.x < 0:
-			setBlockQueue.append([[abs(borderMin.x)+pos.x, pos.y], id])
-		else:
-			setBlockQueue.append([[pos.x, pos.y], id])
+		if send:
+			if borderMin.x < 0:
+				setBlockQueue.append([[abs(borderMin.x)+pos.x, pos.y], id])
+			else:
+				setBlockQueue.append([[pos.x, pos.y], id])
 	return true
 
 func animateBlocks(fromId, toId):
@@ -126,6 +128,9 @@ func animateBlocks(fromId, toId):
 		setBlock(tilePos, fromId+(frame%(toId-fromId+1)), false)
 
 func _process(delta):
+	
+	Network.databaseData["inventory"] = hotbar
+	Network.databaseData["inventoryAmount"] = hotbarAmount
 	
 	if Input.is_action_just_pressed("test"):
 		generateWorld([0, 0, 200, 100, true])
@@ -170,6 +175,13 @@ func _process(delta):
 	
 	if Input.is_action_pressed("zoomOut"):
 		$Camera2D.zoom += Vector2(zoomSpeed, zoomSpeed)*$Camera2D.zoom
+	
+	var zoom = $Camera2D.zoom.x
+	if zoom < 0.1:
+		zoom = 0.1
+	if not godmode:
+		zoom = clamp(zoom, 0.1, 2.5)
+	$Camera2D.zoom = Vector2(zoom, zoom)
 	
 	if Input.is_action_just_pressed("hotbar1"):
 		selectedSlot = 1
@@ -242,14 +254,21 @@ func _process(delta):
 				add_child(itemNew)
 				itemNew.item = oldBlock
 				itemNew.position = mp*64 + Vector2(32, 32)
-			
+
 func _ready():
+	if Network.databaseData.has("inventory"):
+		hotbar = Network.databaseData["inventory"]
+
+	if Network.databaseData.has("inventoryAmount"):
+		hotbarAmount = Network.databaseData["inventoryAmount"]
+	
 	$MeshInstance2D.scale = Vector2(99999999, 99999999)
 	
 	if Network.databaseData.has("pos"):
 		Global.player = Network.instance_player(Network.id, Vector2(Network.databaseData["pos"][0], Network.databaseData["pos"][1]))
 	else:
 		Global.player = Network.instance_player(Network.id)
+	$Camera2D.position = Global.player.position
 	borderMax.x += 1
 	borderMax.y += 1
 	
@@ -283,6 +302,9 @@ func _ready():
 	$WorldDarker.visible = true
 
 func _on_Back_pressed():
+	for child in Players.get_children():
+		child.queue_free()
+	Network.sendMsg({"leavegame": Network.id})
 	Global.changeScene("Menu")
 
 func generateWorld(userdata):

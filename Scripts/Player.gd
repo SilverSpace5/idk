@@ -26,7 +26,6 @@ func _process(delta):
 		data = Network.playerData[name]
 	
 	if name == Network.id:
-		print(onFloor)
 		var x_input = int(Input.is_action_pressed("right")) - int(Input.is_action_pressed("left"))
 		var y_input = int(Input.is_action_pressed("down")) - int(Input.is_action_pressed("up"))
 		
@@ -88,6 +87,7 @@ func _process(delta):
 			position = Vector2(0, 0)
 			velocity = Vector2(0, 0)
 	else:
+		
 		if not data.has("position"):
 			return
 		

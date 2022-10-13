@@ -36,6 +36,12 @@ func _ready():
 	print("Getting database data...")
 	var list = yield(Network.getDatabase(), "completed")
 	Network.databaseData = yield(Network.getDatabaseData(id), "completed")
+	if Network.databaseData.has("inventory"):
+		for i in range(len(Network.databaseData["inventory"])-1):
+			Network.databaseData["inventory"][i] = int(Network.databaseData["inventory"][i])
+	if Network.databaseData.has("inventoryAmount"):
+		for i in range(len(Network.databaseData["inventoryAmount"])-1):
+			Network.databaseData["inventoryAmount"][i] = int(Network.databaseData["inventoryAmount"][i])
 	print("Got data: " + str(Network.databaseData))
 	print("Done")
 	
@@ -97,3 +103,10 @@ func instance_node(node: Object, parent: Object) -> Object:
 	parent.add_child(node_instance)
 	return node_instance
 
+func getVector(string):
+	var vector = string
+	vector[0] = "["
+	vector[len(vector)-1] = "]"
+	vector = parse_json(vector)
+	vector = Vector2(vector[0], vector[1])
+	return vector
