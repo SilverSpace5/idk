@@ -3,23 +3,34 @@ extends Node2D
 var frame = 0
 var frameTimer = 0
 var nearbyBlockTimer = 99
-var selectedSlot = 1
+var selectedSlot = 0
 var lastPlaced = -2
 var hotbar = [-1, -1, -1, -1, -1]
 var hotbarAmount = [0, 0, 0, 0, 0]
-var hotbarSlots = [null, null, null, null, null]
-var hotbarCooldown = [0, 0, 0, 0, 0]
+var hotbarSlots = [null, null, null, null, null, null, null, null, null, null]
+var hotbarCooldown = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 var item = load("res://Item.tscn")
 var godmode = false
 var updated = false
 var setBlockQueue = []
 var nearbyBlocks = []
+var nearbyBlockIds = []
 var lastPlayerPos = Vector2(999, 999)
+var editCooldown = 0
+var blockCooldowns = {}
+var protected = [
+	[150, 0, 170, 100]
+]
 
 export var saving = true
 export var loading = true
 export var borderMin = Vector2(0, 0)
 export var borderMax = Vector2(0, 0)
+
+var connections = [
+	[29, 30, 31, 32, 33, 34, 35, 36]
+]
+#var lava = [29, 30, 31, 32, 33, 34, 35, 36]
 
 """
 Blocks:
@@ -42,6 +53,53 @@ var blocks = {
 	"grey": 4
 }
 
+func flowBlocks(fromId, toId, dis):
+	var flowIds = []
+	var tiles = []
+	var changes = []
+	for i in range(toId-fromId+1):
+		flowIds.append(fromId+i)
+		tiles.append_array(getBlocks(fromId+i))
+		
+	for tilePos in tiles:
+		var moved = false
+		if $World.get_cell(tilePos.x, tilePos.y+1) == -1 and not moved:
+			changes.append([tilePos, -1])
+			changes.append([Vector2(tilePos.x, tilePos.y+1), fromId])
+			moved = true
+#			setBlock(tilePos, -1, false, true)
+#			setBlock(Vector2(tilePos.x, tilePos.y+1), 29, false, true)
+		
+		var downPosX = 1
+		var downNegX = 1
+		var posX = 1
+		var negX = 1
+		while ($World.get_cellv(Vector2(tilePos.x + posX, tilePos.y)) == -1 or $World.get_cellv(Vector2(tilePos.x + posX, tilePos.y)) in flowIds) and posX < dis:
+			posX += 1
+		while ($World.get_cellv(Vector2(tilePos.x - negX, tilePos.y)) == -1 or $World.get_cellv(Vector2(tilePos.x - negX, tilePos.y)) in flowIds) and negX < dis:
+			negX += 1
+		while $World.get_cellv(Vector2(tilePos.x + downPosX, tilePos.y + 1)) != -1 and not $World.get_cellv(Vector2(tilePos.x + downPosX, tilePos.y + 1)) in flowIds and downPosX < dis:
+			downPosX += 1
+		while $World.get_cellv(Vector2(tilePos.x - downNegX, tilePos.y + 1)) != -1 and not $World.get_cellv(Vector2(tilePos.x - downNegX, tilePos.y + 1)) in flowIds and downNegX < dis:
+			downNegX += 1
+		
+		if downPosX < downNegX and $World.get_cellv(Vector2(tilePos.x + 1, tilePos.y)) == -1 and not moved:
+			if not $World.get_cellv(Vector2(tilePos.x + 2, tilePos.y)) in flowIds:
+				changes.append([tilePos, -1])
+				changes.append([Vector2(tilePos.x + 1, tilePos.y), fromId])
+				moved = true
+		
+		if downNegX < downPosX and $World.get_cellv(Vector2(tilePos.x - 1, tilePos.y)) == -1 and not moved:
+			if not $World.get_cellv(Vector2(tilePos.x - 2, tilePos.y)) in flowIds:
+				changes.append([tilePos, -1])
+				changes.append([Vector2(tilePos.x - 1, tilePos.y), fromId])
+				moved = true
+	
+	if len(changes) > 0:
+		for change in changes:
+			setBlock(change[0], change[1], false, true)
+		updateNearbyBlocks()
+
 func getWorldList(from, to):
 	var worldList = []
 	for x in range(to.x-from.x):
@@ -62,16 +120,20 @@ func updateNearbyBlocks():
 	var screenHeight = 900*$Camera2D.zoom.y
 	var playerPos = Global.player.position
 	nearbyBlocks = []
+	nearbyBlockIds = []
 	for tilePos in $World.get_used_cells():
 		if abs(playerPos.x - tilePos.x*64) < screenWidth and abs(playerPos.y - tilePos.y*64) < screenHeight:
 			nearbyBlocks.append(tilePos)
+			nearbyBlockIds.append($World.get_cellv(tilePos))
 	worldUpdated()
 
 func getBlocks(id):
 	var foundBlocks = []
+	var i = 0
 	for tilePos in nearbyBlocks:
-		if $World.get_cellv(tilePos) == id:
+		if nearbyBlockIds[i] == id:
 			foundBlocks.append(tilePos)
+		i += 1
 	return foundBlocks
 
 func worldUpdated():
@@ -115,15 +177,18 @@ func setBlock(pos, id, important=true, send=true):
 		$WorldDarker.set_cellv(pos, -1)
 	if important:
 		updateNearbyBlocks()
-		if send:
-			if borderMin.x < 0:
-				setBlockQueue.append([[abs(borderMin.x)+pos.x, pos.y], id])
-			else:
-				setBlockQueue.append([[pos.x, pos.y], id])
+	if send:
+		if borderMin.x < 0:
+			setBlockQueue.append([[abs(borderMin.x)+pos.x, pos.y], id])
+		else:
+			setBlockQueue.append([[pos.x, pos.y], id])
 	return true
 
 func animateBlocks(fromId, toId):
-	var tiles = $World.get_used_cells_by_id(fromId+((frame-1)%(toId-fromId+1)))
+	var tiles = []
+	for i in range(toId-fromId+1):
+		tiles.append_array(getBlocks(fromId+i))
+	#var tiles = $World.get_used_cells_by_id(fromId+((frame-1)%(toId-fromId+1)))
 	for tilePos in tiles:
 		setBlock(tilePos, fromId+(frame%(toId-fromId+1)), false)
 
@@ -131,9 +196,6 @@ func _process(delta):
 	
 	Network.databaseData["inventory"] = hotbar
 	Network.databaseData["inventoryAmount"] = hotbarAmount
-	
-	if Input.is_action_just_pressed("test"):
-		generateWorld([0, 0, 200, 100, true])
 	
 	nearbyBlockTimer += delta
 	if nearbyBlockTimer >= 0.25 or len(setBlockQueue) < 100:
@@ -158,7 +220,7 @@ func _process(delta):
 	
 	updated = false
 	
-	if Input.is_action_just_pressed("godmode"):
+	if Input.is_action_just_pressed("godmode") and Network.admin:
 		if godmode:
 			godmode = false
 		else:
@@ -183,16 +245,9 @@ func _process(delta):
 		zoom = clamp(zoom, 0.1, 2.5)
 	$Camera2D.zoom = Vector2(zoom, zoom)
 	
-	if Input.is_action_just_pressed("hotbar1"):
-		selectedSlot = 1
-	if Input.is_action_just_pressed("hotbar2"):
-		selectedSlot = 2
-	if Input.is_action_just_pressed("hotbar3"):
-		selectedSlot = 3
-	if Input.is_action_just_pressed("hotbar4"):
-		selectedSlot = 4
-	if Input.is_action_just_pressed("hotbar5"):
-		selectedSlot = 5
+	for i in range(10):
+		if Input.is_action_just_pressed("hotbar" + str(i)):
+			selectedSlot = i
 	
 	$Camera2D.position += (Global.player.position - $Camera2D.position) / 7.5
 	
@@ -200,25 +255,48 @@ func _process(delta):
 	if frameTimer > 0.1:
 		frameTimer = 0
 		frame += 1
+		
+		flowBlocks(29, 36, 5) # Water
+		
 		animateBlocks(21, 22) # Test
 		animateBlocks(23, 28) # Rainbow
 		animateBlocks(29, 36) # Water
 		animateBlocks(37, 44) # Lava
+	
+	for blockCooldown in blockCooldowns:
+		blockCooldowns[blockCooldown] -= delta
+		if blockCooldowns[blockCooldown] <= 0:
+			blockCooldowns.erase(blockCooldown)
+	
 	var mousePos = get_global_mouse_position()
 	var mp = Vector2(round((mousePos.x+32)/64), round((mousePos.y+32)/64))
 	$MouseSelect.position = Vector2(mp.x*64-32, mp.y*64-32)
 	mp.x -= 1
 	mp.y -= 1
+	
+	var blocked = false
+	
+	for area in protected:
+		if mp.x >= area[0] and mp.x < area[2] and mp.y >= area[1] and mp.y < area[3]:
+			blocked = true
+	
+	if godmode:
+		blocked = false
+	
 	if not Input.is_action_pressed("leftClick"):
 		lastPlaced = -2
-	if Input.is_action_pressed("leftClick") and hotbar[selectedSlot-1] != $World.get_cellv(mp) and hotbar[selectedSlot-1] != 0 and (hotbar[selectedSlot-1] == lastPlaced or lastPlaced == -2):
+	if Input.is_action_pressed("leftClick") and hotbar[selectedSlot] != $World.get_cellv(mp) and hotbar[selectedSlot] != 0 and (hotbar[selectedSlot] == lastPlaced or lastPlaced == -2) and not blocked:
 		var oldBlock = $World.get_cellv(mp)
 		var replaced = true
 		var can = true
 		
-		if oldBlock == 5 and hotbar[selectedSlot-1] == 1:
+		for connection in connections:
+			if oldBlock in connection:
+				oldBlock = connection[0]
+		
+		if oldBlock == 5 and hotbar[selectedSlot] == 1:
 			can = false
-		if oldBlock == 1 and hotbar[selectedSlot-1] == 5:
+		if oldBlock == 1 and hotbar[selectedSlot] == 5:
 			can = false
 		
 		if hotbarSlots[selectedSlot-1].amount > 0 and oldBlock != 12 and can:
@@ -236,38 +314,49 @@ func _process(delta):
 		if oldBlock == 12:
 			replaced = false
 		
-#		if abs(mp.x) >= 35 or mp.y <= -20 or mp.y >= 12:
-#			replaced = false
 		
 		if hotbarSlots[selectedSlot-1].amount > 0 and replaced:
-			lastPlaced = hotbar[selectedSlot-1]
-			if setBlock(mp, hotbar[selectedSlot-1]):
+			lastPlaced = hotbar[selectedSlot]
+			if setBlock(mp, hotbar[selectedSlot]):
 				if not godmode:
 					hotbarSlots[selectedSlot-1].amount -= 1
 				if hotbarSlots[selectedSlot-1].amount <= 0:
 					hotbarSlots[selectedSlot-1].item = -1
-	if Input.is_action_pressed("rightClick"):
+	if Input.is_action_pressed("rightClick") and not blockCooldowns.has(mp) and not blocked:
 		var oldBlock = $World.get_cellv(mp)
+		for connection in connections:
+			if oldBlock in connection:
+				oldBlock = connection[0]
 		if oldBlock != 12:
 			if setBlock(mp, -1):
+				blockCooldowns[mp] = 0.25
+				var itemId = Global.getId(10)
+				Network.sendMsg({"broadcast": ["breakBlock", {"mpX": mp.x, "mpY": mp.y, "oldBlock": oldBlock, "id": itemId}]})
 				var itemNew = item.instance()
 				add_child(itemNew)
 				itemNew.item = oldBlock
+				itemNew.id = itemId
 				itemNew.position = mp*64 + Vector2(32, 32)
 
 func _ready():
-	if Network.databaseData.has("inventory"):
-		hotbar = Network.databaseData["inventory"]
-
-	if Network.databaseData.has("inventoryAmount"):
-		hotbarAmount = Network.databaseData["inventoryAmount"]
+	hotbar = Network.databaseData["hotbar"]
+	hotbarAmount = Network.databaseData["hotbarAmount"]
 	
-	$MeshInstance2D.scale = Vector2(99999999, 99999999)
+	var databaseHotbarLen = len(Global.defaultDatabase["hotbar"])
+	var databaseHotbarAmountLen = len(Global.defaultDatabase["hotbarAmount"])
 	
-	if Network.databaseData.has("pos"):
-		Global.player = Network.instance_player(Network.id, Vector2(Network.databaseData["pos"][0], Network.databaseData["pos"][1]))
-	else:
-		Global.player = Network.instance_player(Network.id)
+	while len(hotbar) < databaseHotbarLen:
+		hotbar.append(-1)
+	while len(hotbar) > databaseHotbarLen:
+		hotbar.pop_front()
+	while len(hotbarAmount) < databaseHotbarAmountLen:
+		hotbarAmount.append(0)
+	while len(hotbarAmount) > databaseHotbarAmountLen:
+		hotbarAmount.pop_front()
+	
+	#$MeshInstance2D.scale = Vector2(99999999, 99999999)
+	
+	Global.player = Network.instance_player(Network.id, Vector2(Network.databaseData["pos"][0], Network.databaseData["pos"][1]))
 	$Camera2D.position = Global.player.position
 	borderMax.x += 1
 	borderMax.y += 1

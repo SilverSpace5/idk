@@ -8,32 +8,53 @@ var worldMap = []
 var id = ""
 var randomSeed = randi()
 var noise
+var playTime = 0
 var aToZ = "abcdefghijklmnopqrstuvwxyzABCDEFFGHIJKLMNOPQRSTUVWXYZ"
+var letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+var version = 0
+
+var defaultDatabase = {
+	"pos": [0, 0],
+	"hotbar": [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+	"hotbarAmount": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	"username": "Unnamed",
+	"player": 3
+}
 
 func changeScene(newScene):
 	sceneName = newScene
 	get_tree().change_scene("res://Scenes/" + newScene + ".tscn")
 
 func _process(delta):
+	if sceneName == "Game":
+		playTime += delta
+		Network.data["playing"] = true
+	else:
+		playTime = 0
+		Network.data["playing"] = false
+	if ready:
+		Network.data["username"] = Network.databaseData["username"]
 	scene = get_tree().get_root().get_node(sceneName)
 
 func _ready():
 	randomize()
 	randomSeed = randi()
-	var data = SaveLoad.loadData("silver-idk-id.data")
-	
-	if data.has("id"):
-		id = data["id"]
-	else:
-		id = ""
-		for i in range(6):
-			randomize()
-			id += str(round(rand_range(0, 9)))
-		SaveLoad.saveData("silver-idk-id.data", {"id": id})
 	
 	while not Network.connected:
 		yield(get_tree().create_timer(0.1), "timeout")
-	print("Getting database data...")
+	
+	var data = SaveLoad.loadData("silver-idk-id5.data")
+	if data.has("id"):
+		id = data["id"]
+	else:
+		id = getId(10)
+		Network.databaseData = defaultDatabase.duplicate(true)
+		Network.updateDatabaseData(id)
+		SaveLoad.saveData("silver-idk-id5.data", {"id": id})
+	
+	#print("Getting database data...")
+	Console.log2("Getting database data...")
 	var list = yield(Network.getDatabase(), "completed")
 	Network.databaseData = yield(Network.getDatabaseData(id), "completed")
 	if Network.databaseData.has("inventory"):
@@ -42,8 +63,16 @@ func _ready():
 	if Network.databaseData.has("inventoryAmount"):
 		for i in range(len(Network.databaseData["inventoryAmount"])-1):
 			Network.databaseData["inventoryAmount"][i] = int(Network.databaseData["inventoryAmount"][i])
+	for key in Network.databaseData:
+		if not key in defaultDatabase.keys():
+			Network.databaseData.erase(key)
+	
+	for key in defaultDatabase:
+		if not key in Network.databaseData.keys():
+			Network.databaseData[key] = defaultDatabase[key]
 	print("Got data: " + str(Network.databaseData))
-	print("Done")
+	#Console.log2("Got data: " + str(Network.databaseData))
+	Console.log2("Done")
 	
 	ready = true
 
@@ -110,3 +139,10 @@ func getVector(string):
 	vector = parse_json(vector)
 	vector = Vector2(vector[0], vector[1])
 	return vector
+	
+func getId(digits) -> String:
+	var id = ""
+	for i in range(digits):
+		randomize()
+		id += str(letters[floor(rand_range(0, len(letters)-1))])
+	return id

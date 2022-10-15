@@ -9,8 +9,8 @@ var ready = false
 func _ready():
 	if isHotbar:
 		yield(get_tree().create_timer(0.1), "timeout")
-		item = Global.scene.hotbar[int(name[4])-1]
-		amount = Global.scene.hotbarAmount[int(name[4])-1]
+		item = Global.scene.hotbar[int(name[4])]
+		amount = Global.scene.hotbarAmount[int(name[4])]
 	ready = true
 
 func _process(delta):
@@ -40,12 +40,12 @@ func _process(delta):
 	
 	if isHotbar:
 		if ready:
-			Global.scene.hotbar[int(name[4])-1] = item
-			Global.scene.hotbarAmount[int(name[4])-1] = amount
-		Global.scene.hotbarSlots[int(name[4])-1] = self
+			Global.scene.hotbar[int(name[4])] = item
+			Global.scene.hotbarAmount[int(name[4])] = amount
+		Global.scene.hotbarSlots[int(name[4])] = self
 		if int(name[4]) == Global.scene.selectedSlot:
 			scale = Vector2(4.4, 4.4)
-			modulate = Color(1, 1, 1)
+			modulate = Color(1, 1, 1, 0.85)
 		else:
 			scale = Vector2(4, 4)
-			modulate = Color(0.85, 0.85, 0.85)
+			modulate = Color(0.85, 0.85, 0.85, 0.85)

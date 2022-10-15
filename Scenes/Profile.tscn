@@ -1,0 +1,104 @@
+[gd_scene load_steps=11 format=2]
+
+[ext_resource path="res://Assets/default.tres" type="DynamicFont" id=1]
+[ext_resource path="res://Back.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Assets/players.png" type="Texture" id=3]
+[ext_resource path="res://BG.tscn" type="PackedScene" id=4]
+[ext_resource path="res://Scripts/Profile.gd" type="Script" id=5]
+[ext_resource path="res://Assets/homespun.ttf" type="DynamicFontData" id=8]
+
+[sub_resource type="DynamicFont" id=1]
+size = 40
+outline_size = 2
+outline_color = Color( 0, 0, 0, 1 )
+font_data = ExtResource( 8 )
+
+[sub_resource type="DynamicFont" id=2]
+size = 25
+outline_size = 2
+outline_color = Color( 0, 0, 0, 1 )
+font_data = ExtResource( 8 )
+
+[sub_resource type="DynamicFont" id=3]
+size = 100
+outline_size = 2
+outline_color = Color( 0, 0, 0, 1 )
+font_data = ExtResource( 8 )
+
+[sub_resource type="DynamicFont" id=4]
+size = 40
+outline_size = 2
+outline_color = Color( 0, 0, 0, 1 )
+font_data = ExtResource( 8 )
+
+[node name="Profile" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 5 )
+
+[node name="Title" type="Label" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -72.0
+margin_top = 42.0
+margin_right = 73.0
+margin_bottom = 92.0
+grow_horizontal = 2
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_fonts/font = ExtResource( 1 )
+text = "Profile & Customization"
+align = 1
+
+[node name="Back" parent="." instance=ExtResource( 2 )]
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -127.0
+margin_top = -95.0
+margin_right = 127.0
+margin_bottom = 154.0
+grow_horizontal = 2
+
+[node name="Username" type="LineEdit" parent="VBoxContainer"]
+margin_right = 254.0
+margin_bottom = 50.0
+grow_horizontal = 2
+custom_fonts/font = SubResource( 1 )
+align = 1
+max_length = 20
+placeholder_text = "Username"
+
+[node name="id" type="Label" parent="VBoxContainer"]
+margin_top = 54.0
+margin_right = 254.0
+margin_bottom = 80.0
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_fonts/font = SubResource( 2 )
+align = 1
+
+[node name="Space" type="Label" parent="VBoxContainer"]
+margin_top = 84.0
+margin_right = 254.0
+margin_bottom = 184.0
+custom_fonts/font = SubResource( 3 )
+
+[node name="Change" type="Button" parent="VBoxContainer"]
+margin_top = 188.0
+margin_right = 254.0
+margin_bottom = 234.0
+custom_fonts/font = SubResource( 4 )
+text = "Change"
+
+[node name="Sprite" type="Sprite" parent="."]
+position = Vector2( 512, 337 )
+scale = Vector2( 5, 5 )
+texture = ExtResource( 3 )
+hframes = 4
+frame = 3
+
+[node name="BG" parent="." instance=ExtResource( 4 )]
+
+[connection signal="pressed" from="VBoxContainer/Change" to="." method="_on_Change_pressed"]

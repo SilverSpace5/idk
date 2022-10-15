@@ -26,6 +26,8 @@ func _process(delta):
 		data = Network.playerData[name]
 	
 	if name == Network.id:
+		$Username.text = Network.databaseData["username"]
+		$Players.frame = Network.databaseData["player"]
 		var x_input = int(Input.is_action_pressed("right")) - int(Input.is_action_pressed("left"))
 		var y_input = int(Input.is_action_pressed("down")) - int(Input.is_action_pressed("up"))
 		
@@ -48,7 +50,7 @@ func _process(delta):
 			jump = 0
 		if is_on_ceiling():
 			velocity.y = gravity
-		if (Input.is_action_just_pressed("jump") or (Input.is_action_pressed("jump") and jump > 0)) and (frames <= 3 or (jump <= 5 and hold)):
+		if not Console.focus and (Input.is_action_just_pressed("jump") or (Input.is_action_pressed("jump") and jump > 0)) and (frames <= 3 or (jump <= 5 and hold)):
 			var jump2 = jumpSpeed + (jumpSpeed*0.1*jump)
 			velocity.y = -jump2
 			jump += 1
@@ -69,9 +71,10 @@ func _process(delta):
 		if godmode:
 			velocity.y *= 0.8
 		
-		velocity.x += x_input * speed
-		if godmode:
-			velocity.y += y_input * speed
+		if not Console.focus:
+			velocity.x += x_input * speed
+			if godmode:
+				velocity.y += y_input * speed
 		if not is_on_floor():
 			speed *= 3
 		
@@ -91,6 +94,9 @@ func _process(delta):
 		if not data.has("position"):
 			return
 		
+		$Username.text = data["username"]
+		$Players.frame = data["player"]
+		
 		var pos = Global.getVector(data["position"])
 		var vel = Global.getVector(data["velocity"])
 		
@@ -104,3 +110,5 @@ func _on_tick_rate_timeout():
 	if name == Network.id:
 		Network.data["position"] = global_position
 		Network.data["velocity"] = velocity
+		Network.data["username"] = $Username.text
+		Network.data["player"] = $Players.frame
