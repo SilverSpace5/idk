@@ -11,6 +11,7 @@ var data = {}
 var hold = false
 var onFloor = false
 var godmode = false
+var currentBlock = -1
 
 onready var tween = $Tween
 
@@ -22,6 +23,27 @@ func _ready():
 		#Global.scene.get_node("Camera2D").position = position
 
 func _process(delta):
+	var scalex = abs(velocity.x)/3000+1
+	var scaley = abs(velocity.y)/2500+1
+	
+	scalex = clamp(scalex, 1, 1.35)
+	scaley = clamp(scaley, 1, 1.35)
+	
+	var scalex2 = scalex
+	var scaley2 = scaley
+	
+	scalex /= scaley2
+	scaley /= scalex2
+	
+	$Players.scale.x += (scalex - $Players.scale.x)/5
+	$Players.scale.y += (scaley - $Players.scale.y)/5
+	$Players.position.y = $Players.scale.y*2-1
+	
+	currentBlock = Global.scene.get_node("World").get_cell(round(position.x/64-0.5), round(position.y/64-0.5))
+	for connection in Global.scene.connections:
+		if currentBlock in connection:
+			currentBlock = connection[0]
+	
 	if Network.playerData.has(name):
 		data = Network.playerData[name]
 	
@@ -32,7 +54,10 @@ func _process(delta):
 		var y_input = int(Input.is_action_pressed("down")) - int(Input.is_action_pressed("up"))
 		
 		if not godmode:
-			velocity.y += gravity
+			if currentBlock == 29:
+				velocity.y += gravity/3
+			else:
+				velocity.y += gravity
 		
 		$Area2D.update()
 			
@@ -48,6 +73,9 @@ func _process(delta):
 			velocity.y = 0
 			hold = true
 			jump = 0
+		if currentBlock == 29:
+			jump = 0
+			hold = true
 		if is_on_ceiling():
 			velocity.y = gravity
 		if not Console.focus and (Input.is_action_just_pressed("jump") or (Input.is_action_pressed("jump") and jump > 0)) and (frames <= 3 or (jump <= 5 and hold)):
@@ -98,13 +126,13 @@ func _process(delta):
 		$Players.frame = data["player"]
 		
 		var pos = Global.getVector(data["position"])
-		var vel = Global.getVector(data["velocity"])
+		velocity = Global.getVector(data["velocity"])
 		
 		if pos != position:
 			tween.interpolate_property(self, "global_position", global_position, pos, 0.1)
 			tween.start()
 		if not tween.is_active():
-			move_and_slide(vel)
+			move_and_slide(velocity)
 
 func _on_tick_rate_timeout():
 	if name == Network.id:

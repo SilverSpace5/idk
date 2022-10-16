@@ -4,6 +4,7 @@ export (bool) var isHotbar = false
 export (int) var item = 0
 export (int) var amount = 1
 
+var hovering = false
 var ready = false
 
 func _ready():
@@ -31,8 +32,8 @@ func _process(delta):
 		$CanvasLayer/Amount.visible = true
 		$Item.set_cell(-1, -1, item)
 	
-	$CanvasLayer.offset = position
-	$CanvasLayer.scale = scale
+	$CanvasLayer.offset = global_position
+	$CanvasLayer.scale = global_scale
 	if amount != 1:
 		$CanvasLayer/Amount.text = str(amount)
 	else:
@@ -49,3 +50,7 @@ func _process(delta):
 		else:
 			scale = Vector2(4, 4)
 			modulate = Color(0.85, 0.85, 0.85, 0.85)
+
+
+func _on_Slot_mouse_entered():
+	print("YYEYEEYEYE")

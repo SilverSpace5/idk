@@ -72,16 +72,14 @@ current = true
 zoom = Vector2( 1.25, 1.25 )
 smoothing_speed = 7.5
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="Inventory" type="Node2D" parent="Camera2D"]
+scale = Vector2( 0.333333, 0.333333 )
 
-[node name="Inventory" type="Node2D" parent="CanvasLayer"]
-
-[node name="Hotbar" type="Node2D" parent="CanvasLayer/Inventory"]
-position = Vector2( 512, 560 )
-scale = Vector2( 0.5, 0.5 )
+[node name="Hotbar" type="Node2D" parent="Camera2D/Inventory"]
+position = Vector2( 0, 315 )
 z_index = 5
 
-[node name="Slot0" parent="CanvasLayer/Inventory/Hotbar" instance=ExtResource( 5 )]
+[node name="Slot0" parent="Camera2D/Inventory/Hotbar" instance=ExtResource( 5 )]
 modulate = Color( 1, 1, 1, 0.74902 )
 position = Vector2( -288, 0 )
 scale = Vector2( 4, 4 )
@@ -89,7 +87,7 @@ isHotbar = true
 item = -1
 amount = 0
 
-[node name="Slot1" parent="CanvasLayer/Inventory/Hotbar" instance=ExtResource( 5 )]
+[node name="Slot1" parent="Camera2D/Inventory/Hotbar" instance=ExtResource( 5 )]
 modulate = Color( 1, 1, 1, 0.74902 )
 position = Vector2( -224, 0 )
 scale = Vector2( 4, 4 )
@@ -97,7 +95,7 @@ isHotbar = true
 item = -1
 amount = 0
 
-[node name="Slot2" parent="CanvasLayer/Inventory/Hotbar" instance=ExtResource( 5 )]
+[node name="Slot2" parent="Camera2D/Inventory/Hotbar" instance=ExtResource( 5 )]
 modulate = Color( 1, 1, 1, 0.74902 )
 position = Vector2( -160, 0 )
 scale = Vector2( 4, 4 )
@@ -105,7 +103,7 @@ isHotbar = true
 item = -1
 amount = 0
 
-[node name="Slot3" parent="CanvasLayer/Inventory/Hotbar" instance=ExtResource( 5 )]
+[node name="Slot3" parent="Camera2D/Inventory/Hotbar" instance=ExtResource( 5 )]
 modulate = Color( 1, 1, 1, 0.74902 )
 position = Vector2( -96, 0 )
 scale = Vector2( 4, 4 )
@@ -113,7 +111,7 @@ isHotbar = true
 item = -1
 amount = 0
 
-[node name="Slot4" parent="CanvasLayer/Inventory/Hotbar" instance=ExtResource( 5 )]
+[node name="Slot4" parent="Camera2D/Inventory/Hotbar" instance=ExtResource( 5 )]
 modulate = Color( 1, 1, 1, 0.74902 )
 position = Vector2( -32, 0 )
 scale = Vector2( 4, 4 )
@@ -121,7 +119,7 @@ isHotbar = true
 item = -1
 amount = 0
 
-[node name="Slot5" parent="CanvasLayer/Inventory/Hotbar" instance=ExtResource( 5 )]
+[node name="Slot5" parent="Camera2D/Inventory/Hotbar" instance=ExtResource( 5 )]
 modulate = Color( 1, 1, 1, 0.74902 )
 position = Vector2( 32, 0 )
 scale = Vector2( 4, 4 )
@@ -129,7 +127,7 @@ isHotbar = true
 item = -1
 amount = 0
 
-[node name="Slot6" parent="CanvasLayer/Inventory/Hotbar" instance=ExtResource( 5 )]
+[node name="Slot6" parent="Camera2D/Inventory/Hotbar" instance=ExtResource( 5 )]
 modulate = Color( 1, 1, 1, 0.74902 )
 position = Vector2( 96, 0 )
 scale = Vector2( 4, 4 )
@@ -137,7 +135,7 @@ isHotbar = true
 item = -1
 amount = 0
 
-[node name="Slot7" parent="CanvasLayer/Inventory/Hotbar" instance=ExtResource( 5 )]
+[node name="Slot7" parent="Camera2D/Inventory/Hotbar" instance=ExtResource( 5 )]
 modulate = Color( 1, 1, 1, 0.74902 )
 position = Vector2( 160, 0 )
 scale = Vector2( 4, 4 )
@@ -145,7 +143,7 @@ isHotbar = true
 item = -1
 amount = 0
 
-[node name="Slot8" parent="CanvasLayer/Inventory/Hotbar" instance=ExtResource( 5 )]
+[node name="Slot8" parent="Camera2D/Inventory/Hotbar" instance=ExtResource( 5 )]
 modulate = Color( 1, 1, 1, 0.74902 )
 position = Vector2( 224, 0 )
 scale = Vector2( 4, 4 )
@@ -153,13 +151,25 @@ isHotbar = true
 item = -1
 amount = 0
 
-[node name="Slot9" parent="CanvasLayer/Inventory/Hotbar" instance=ExtResource( 5 )]
+[node name="Slot9" parent="Camera2D/Inventory/Hotbar" instance=ExtResource( 5 )]
 modulate = Color( 1, 1, 1, 0.74902 )
 position = Vector2( 288, 0 )
 scale = Vector2( 4, 4 )
 isHotbar = true
 item = -1
 amount = 0
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Water" type="ColorRect" parent="CanvasLayer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0, 0.529412, 1, 0 )
+
+[node name="Lava" type="ColorRect" parent="CanvasLayer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 1, 0.494118, 0, 0 )
 
 [node name="Back" parent="." instance=ExtResource( 2 )]
 

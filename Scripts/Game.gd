@@ -5,8 +5,8 @@ var frameTimer = 0
 var nearbyBlockTimer = 99
 var selectedSlot = 0
 var lastPlaced = -2
-var hotbar = [-1, -1, -1, -1, -1]
-var hotbarAmount = [0, 0, 0, 0, 0]
+var hotbar = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
+var hotbarAmount = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 var hotbarSlots = [null, null, null, null, null, null, null, null, null, null]
 var hotbarCooldown = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 var item = load("res://Item.tscn")
@@ -21,6 +21,8 @@ var blockCooldowns = {}
 var protected = [
 	[150, 0, 170, 100]
 ]
+var waterAlpha = 0
+var lavaAlpha = 0
 
 export var saving = true
 export var loading = true
@@ -28,7 +30,10 @@ export var borderMin = Vector2(0, 0)
 export var borderMax = Vector2(0, 0)
 
 var connections = [
-	[29, 30, 31, 32, 33, 34, 35, 36]
+	[29, 30, 31, 32, 33, 34, 35, 36],
+	[37, 38, 39, 40, 41, 42, 43, 44],
+	[21, 22],
+	[23, 24, 25, 26, 27, 28]
 ]
 #var lava = [29, 30, 31, 32, 33, 34, 35, 36]
 
@@ -143,11 +148,11 @@ func worldUpdated():
 	for tilePos in getBlocks(1):
 		if abs(playerPos.x - tilePos.x*64) < screenWidth and abs(playerPos.y - tilePos.y*64) < screenHeight:
 			if $World.get_cell(tilePos.x, tilePos.y - 1) == -1:
-				setBlock(tilePos, 5, true, false)
+				setBlock(tilePos, 5, true, true)
 	for tilePos in getBlocks(5):
 		if abs(playerPos.x - tilePos.x*64) < screenWidth and abs(playerPos.y - tilePos.y*64) < screenHeight:
 			if $World.get_cell(tilePos.x, tilePos.y - 1) != -1:
-				setBlock(tilePos, 1, true, false)
+				setBlock(tilePos, 1, true, true)
 
 func getWorld():
 	var worldMap = []
@@ -190,12 +195,24 @@ func animateBlocks(fromId, toId):
 		tiles.append_array(getBlocks(fromId+i))
 	#var tiles = $World.get_used_cells_by_id(fromId+((frame-1)%(toId-fromId+1)))
 	for tilePos in tiles:
-		setBlock(tilePos, fromId+(frame%(toId-fromId+1)), false)
+		setBlock(tilePos, fromId+(frame%(toId-fromId+1)), false, false)
 
 func _process(delta):
 	
-	Network.databaseData["inventory"] = hotbar
-	Network.databaseData["inventoryAmount"] = hotbarAmount
+	Network.databaseData["hotbar"] = hotbar
+	Network.databaseData["hotbarAmount"] = hotbarAmount
+	
+	if Global.player.currentBlock in connections[0]:
+		waterAlpha = 0.35
+	else:
+		waterAlpha = 0
+	if Global.player.currentBlock in connections[1]:
+		lavaAlpha = 0.35
+	else:
+		lavaAlpha = 0
+	
+	$CanvasLayer/Water.color.a += (waterAlpha - $CanvasLayer/Water.color.a)/10
+	$CanvasLayer/Lava.color.a += (lavaAlpha - $CanvasLayer/Lava.color.a)/10
 	
 	nearbyBlockTimer += delta
 	if nearbyBlockTimer >= 0.25 or len(setBlockQueue) < 100:
@@ -283,9 +300,12 @@ func _process(delta):
 	if godmode:
 		blocked = false
 	
+	var inRange = godmode or (mp*64).distance_to(Global.player.position) <= 256
+	var far = godmode or (mp*64).distance_to(Global.player.position) >= 64
+	
 	if not Input.is_action_pressed("leftClick"):
 		lastPlaced = -2
-	if Input.is_action_pressed("leftClick") and hotbar[selectedSlot] != $World.get_cellv(mp) and hotbar[selectedSlot] != 0 and (hotbar[selectedSlot] == lastPlaced or lastPlaced == -2) and not blocked:
+	if Input.is_action_pressed("leftClick") and hotbar[selectedSlot] != $World.get_cellv(mp) and hotbar[selectedSlot] != -1 and (hotbar[selectedSlot] == lastPlaced or lastPlaced == -2) and not blocked and inRange and far:
 		var oldBlock = $World.get_cellv(mp)
 		var replaced = true
 		var can = true
@@ -299,7 +319,7 @@ func _process(delta):
 		if oldBlock == 1 and hotbar[selectedSlot] == 5:
 			can = false
 		
-		if hotbarSlots[selectedSlot-1].amount > 0 and oldBlock != 12 and can:
+		if hotbarSlots[selectedSlot].amount > 0 and oldBlock != 12 and can:
 			if oldBlock in hotbar:
 				hotbarSlots[hotbar.find(oldBlock)].amount += 1
 			elif -1 in hotbar:
@@ -315,14 +335,14 @@ func _process(delta):
 			replaced = false
 		
 		
-		if hotbarSlots[selectedSlot-1].amount > 0 and replaced:
+		if hotbarSlots[selectedSlot].amount > 0 and replaced:
 			lastPlaced = hotbar[selectedSlot]
 			if setBlock(mp, hotbar[selectedSlot]):
 				if not godmode:
-					hotbarSlots[selectedSlot-1].amount -= 1
-				if hotbarSlots[selectedSlot-1].amount <= 0:
-					hotbarSlots[selectedSlot-1].item = -1
-	if Input.is_action_pressed("rightClick") and not blockCooldowns.has(mp) and not blocked:
+					hotbarSlots[selectedSlot].amount -= 1
+				if hotbarSlots[selectedSlot].amount <= 0:
+					hotbarSlots[selectedSlot].item = -1
+	if Input.is_action_pressed("rightClick") and not blockCooldowns.has(mp) and not blocked and inRange:
 		var oldBlock = $World.get_cellv(mp)
 		for connection in connections:
 			if oldBlock in connection:
@@ -342,9 +362,14 @@ func _ready():
 	hotbar = Network.databaseData["hotbar"]
 	hotbarAmount = Network.databaseData["hotbarAmount"]
 	
+	for i in range(len(hotbar)):
+		hotbar[i] = int(hotbar[i])
+	for i in range(len(hotbarAmount)):
+		hotbarAmount[i] = int(hotbarAmount[i])
+	
 	var databaseHotbarLen = len(Global.defaultDatabase["hotbar"])
 	var databaseHotbarAmountLen = len(Global.defaultDatabase["hotbarAmount"])
-	
+
 	while len(hotbar) < databaseHotbarLen:
 		hotbar.append(-1)
 	while len(hotbar) > databaseHotbarLen:

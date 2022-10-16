@@ -174,11 +174,12 @@ func _on_data():
 			for setBlock in data["setBlock"]:
 				var block = int(setBlock[1])
 				var pos = Global.scene.borderMin + Vector2(int(setBlock[0][0]), int(setBlock[0][1]))
+				#print("Setting block at " + str(pos) + " to " + str(block))
 				Global.scene.setBlock(pos, block, true, false)
 		if data.has("removeItem") and Global.sceneName == "Game":
 			Global.scene.hotbarSlots[Global.scene.hotbar.find(data["removeItem"])].amount -= 1
 			if Global.scene.hotbarSlots[Global.scene.hotbar.find(data["removeItem"])].amount <= 0:
-				Global.scenehotbarSlots[Global.scene.hotbar.find(data["removeItem"])].item = -1
+				Global.scene.hotbarSlots[Global.scene.hotbar.find(data["removeItem"])].item = -1
 		if data.has("deleteItem") and Global.sceneName == "Game":
 			deletedItems.append(data["deleteItem"])
 		if data.has("breakBlock") and Global.sceneName == "Game":
