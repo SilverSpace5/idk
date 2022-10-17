@@ -114,6 +114,8 @@ func _closed(was_clean = false):
 			print("Retrying")
 			connectToServer()
 			yield(get_tree().create_timer(2), "timeout")
+		if lastScene == "Game":
+			sendMsg({"joinGame": id})
 		Global.changeScene(lastScene)
 		Global.ready = true
 
@@ -181,7 +183,7 @@ func _on_data():
 			for setBlock in data["setBlock"]:
 				var block = int(setBlock[1])
 				var pos = Global.scene.borderMin + Vector2(int(setBlock[0][0]), int(setBlock[0][1]))
-				#print("Setting block at " + str(pos) + " to " + str(block))
+				print("Setting block at " + str(pos) + " to " + str(block))
 				Global.scene.setBlock(pos, block, true, false)
 		if data.has("removeItem") and Global.sceneName == "Game":
 			Global.scene.hotbarSlots[Global.scene.hotbar.find(data["removeItem"])].amount -= 1
@@ -200,6 +202,7 @@ func _on_data():
 func _process(delta):
 	peer.poll()
 	if Global.ready:
+		data["scene"] = Global.sceneName
 		playerData[id] = data
 		sendMsg({"data": data, "id": id})
 		admin = Global.id in admins

@@ -23,6 +23,8 @@ func _ready():
 		#Global.scene.get_node("Camera2D").position = position
 
 func _process(delta):
+	if Global.sceneName != "Game":
+		return
 	var scalex = abs(velocity.x)/3000+1
 	var scaley = abs(velocity.y)/2500+1
 	
