@@ -85,10 +85,17 @@ func _player_disconnected(id):
 func playerJoinGame(id):
 	if Global.playTime > 0.5:
 		Console.log2(playerData[id]["username"] + " Joined!")
-	instance_player(id)
+	if Global.sceneName == "Game" or Global.sceneName == "Loading":
+		instance_player(id)
+		Global.scene.get_node("CanvasLayer/Players").add_item(playerData[id]["username"], null, false)
 
 func playerLeaveGame(id):
-	Console.log2(playerData[id]["username"] + " Left :(")
+	if Global.sceneName == "Game":
+		Console.log2(playerData[id]["username"] + " Left :(")
+		for i in range(Global.scene.get_node("CanvasLayer/Players").get_item_count()):
+			var item = Global.scene.get_node("CanvasLayer/Players").get_item_text(i)
+			if item == playerData[id]["username"]:
+				Global.scene.get_node("CanvasLayer/Players").remove_item(i)
 	if Players.has_node(str(id)):
 		Players.get_node(str(id)).queue_free()
 

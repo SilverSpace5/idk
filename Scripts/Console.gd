@@ -28,7 +28,7 @@ func _process(delta):
 		else:
 			controls += " (ESC) Close Chat"
 		
-		controls += " (1-5) Hotbar"
+		controls += " (1-0) Hotbar"
 	$Controls/Label.text = controls
 	
 	if not focus:

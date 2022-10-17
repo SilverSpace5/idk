@@ -82,8 +82,9 @@ text = "WASD/Arrow Keys to move
 Space/C to Jump
 Left Click to Place
 Right Click to Break
-1-5 Hotbar
--/+ Zoom"
+1-0 Hotbar
+-/+ Zoom
+T/ESC to Chat"
 align = 1
 
 [node name="BG" parent="." instance=ExtResource( 3 )]

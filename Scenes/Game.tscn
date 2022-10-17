@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://World.tres" type="TileSet" id=1]
 [ext_resource path="res://Back.tscn" type="PackedScene" id=2]
@@ -6,15 +6,31 @@
 [ext_resource path="res://Assets/skylighting.png" type="Texture" id=4]
 [ext_resource path="res://Slot.tscn" type="PackedScene" id=5]
 [ext_resource path="res://Background.tres" type="TileSet" id=6]
+[ext_resource path="res://Assets/default.tres" type="DynamicFont" id=7]
+[ext_resource path="res://Assets/homespun.ttf" type="DynamicFontData" id=8]
 
 [sub_resource type="CubeMesh" id=2]
 
 [sub_resource type="CubeMesh" id=24]
 
+[sub_resource type="DynamicFont" id=25]
+size = 20
+outline_size = 2
+outline_color = Color( 0, 0, 0, 1 )
+font_data = ExtResource( 8 )
+
 [node name="Game" type="Node2D"]
 script = ExtResource( 3 )
 borderMin = Vector2( -150, 0 )
 borderMax = Vector2( 370, 100 )
+
+[node name="Back" parent="." instance=ExtResource( 2 )]
+
+[node name="Light2D" type="Light2D" parent="."]
+position = Vector2( 711, 295 )
+scale = Vector2( 9999, -43.0469 )
+texture = ExtResource( 4 )
+shadow_enabled = true
 
 [node name="World" type="TileMap" parent="."]
 modulate = Color( 0.588235, 0.588235, 0.588235, 1 )
@@ -72,14 +88,16 @@ current = true
 zoom = Vector2( 1.25, 1.25 )
 smoothing_speed = 7.5
 
-[node name="Inventory" type="Node2D" parent="Camera2D"]
+[node name="Offset" type="Node2D" parent="Camera2D"]
+
+[node name="Inventory" type="Node2D" parent="Camera2D/Offset"]
 scale = Vector2( 0.333333, 0.333333 )
 
-[node name="Hotbar" type="Node2D" parent="Camera2D/Inventory"]
+[node name="Hotbar" type="Node2D" parent="Camera2D/Offset/Inventory"]
 position = Vector2( 0, 315 )
 z_index = 5
 
-[node name="Slot0" parent="Camera2D/Inventory/Hotbar" instance=ExtResource( 5 )]
+[node name="Slot0" parent="Camera2D/Offset/Inventory/Hotbar" instance=ExtResource( 5 )]
 modulate = Color( 1, 1, 1, 0.74902 )
 position = Vector2( -288, 0 )
 scale = Vector2( 4, 4 )
@@ -87,7 +105,7 @@ isHotbar = true
 item = -1
 amount = 0
 
-[node name="Slot1" parent="Camera2D/Inventory/Hotbar" instance=ExtResource( 5 )]
+[node name="Slot1" parent="Camera2D/Offset/Inventory/Hotbar" instance=ExtResource( 5 )]
 modulate = Color( 1, 1, 1, 0.74902 )
 position = Vector2( -224, 0 )
 scale = Vector2( 4, 4 )
@@ -95,7 +113,7 @@ isHotbar = true
 item = -1
 amount = 0
 
-[node name="Slot2" parent="Camera2D/Inventory/Hotbar" instance=ExtResource( 5 )]
+[node name="Slot2" parent="Camera2D/Offset/Inventory/Hotbar" instance=ExtResource( 5 )]
 modulate = Color( 1, 1, 1, 0.74902 )
 position = Vector2( -160, 0 )
 scale = Vector2( 4, 4 )
@@ -103,7 +121,7 @@ isHotbar = true
 item = -1
 amount = 0
 
-[node name="Slot3" parent="Camera2D/Inventory/Hotbar" instance=ExtResource( 5 )]
+[node name="Slot3" parent="Camera2D/Offset/Inventory/Hotbar" instance=ExtResource( 5 )]
 modulate = Color( 1, 1, 1, 0.74902 )
 position = Vector2( -96, 0 )
 scale = Vector2( 4, 4 )
@@ -111,7 +129,7 @@ isHotbar = true
 item = -1
 amount = 0
 
-[node name="Slot4" parent="Camera2D/Inventory/Hotbar" instance=ExtResource( 5 )]
+[node name="Slot4" parent="Camera2D/Offset/Inventory/Hotbar" instance=ExtResource( 5 )]
 modulate = Color( 1, 1, 1, 0.74902 )
 position = Vector2( -32, 0 )
 scale = Vector2( 4, 4 )
@@ -119,7 +137,7 @@ isHotbar = true
 item = -1
 amount = 0
 
-[node name="Slot5" parent="Camera2D/Inventory/Hotbar" instance=ExtResource( 5 )]
+[node name="Slot5" parent="Camera2D/Offset/Inventory/Hotbar" instance=ExtResource( 5 )]
 modulate = Color( 1, 1, 1, 0.74902 )
 position = Vector2( 32, 0 )
 scale = Vector2( 4, 4 )
@@ -127,7 +145,7 @@ isHotbar = true
 item = -1
 amount = 0
 
-[node name="Slot6" parent="Camera2D/Inventory/Hotbar" instance=ExtResource( 5 )]
+[node name="Slot6" parent="Camera2D/Offset/Inventory/Hotbar" instance=ExtResource( 5 )]
 modulate = Color( 1, 1, 1, 0.74902 )
 position = Vector2( 96, 0 )
 scale = Vector2( 4, 4 )
@@ -135,7 +153,7 @@ isHotbar = true
 item = -1
 amount = 0
 
-[node name="Slot7" parent="Camera2D/Inventory/Hotbar" instance=ExtResource( 5 )]
+[node name="Slot7" parent="Camera2D/Offset/Inventory/Hotbar" instance=ExtResource( 5 )]
 modulate = Color( 1, 1, 1, 0.74902 )
 position = Vector2( 160, 0 )
 scale = Vector2( 4, 4 )
@@ -143,7 +161,7 @@ isHotbar = true
 item = -1
 amount = 0
 
-[node name="Slot8" parent="Camera2D/Inventory/Hotbar" instance=ExtResource( 5 )]
+[node name="Slot8" parent="Camera2D/Offset/Inventory/Hotbar" instance=ExtResource( 5 )]
 modulate = Color( 1, 1, 1, 0.74902 )
 position = Vector2( 224, 0 )
 scale = Vector2( 4, 4 )
@@ -151,7 +169,7 @@ isHotbar = true
 item = -1
 amount = 0
 
-[node name="Slot9" parent="Camera2D/Inventory/Hotbar" instance=ExtResource( 5 )]
+[node name="Slot9" parent="Camera2D/Offset/Inventory/Hotbar" instance=ExtResource( 5 )]
 modulate = Color( 1, 1, 1, 0.74902 )
 position = Vector2( 288, 0 )
 scale = Vector2( 4, 4 )
@@ -171,10 +189,44 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color( 1, 0.494118, 0, 0 )
 
-[node name="Back" parent="." instance=ExtResource( 2 )]
+[node name="PlayerBG" type="Control" parent="CanvasLayer"]
+modulate = Color( 1, 1, 1, 0 )
+margin_right = 40.0
+margin_bottom = 40.0
 
-[node name="Light2D" type="Light2D" parent="."]
-position = Vector2( 0, 231 )
-scale = Vector2( 9999, -43.0469 )
-texture = ExtResource( 4 )
-shadow_enabled = true
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer/PlayerBG"]
+margin_left = 823.0
+margin_top = 5.0
+margin_right = 1024.0
+margin_bottom = 358.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="ColorRect2" type="ColorRect" parent="CanvasLayer/PlayerBG"]
+margin_left = 830.0
+margin_top = 9.0
+margin_right = 1018.0
+margin_bottom = 354.0
+color = Color( 0.866667, 0.866667, 0.866667, 1 )
+
+[node name="PlayersButton" type="Button" parent="CanvasLayer"]
+anchor_left = 1.0
+anchor_right = 1.0
+margin_left = -185.0
+margin_top = 15.0
+margin_right = -13.0
+margin_bottom = 71.0
+grow_horizontal = 0
+focus_mode = 0
+custom_fonts/font = ExtResource( 7 )
+enabled_focus_mode = 0
+text = "Players"
+
+[node name="Players" type="ItemList" parent="CanvasLayer"]
+modulate = Color( 1, 1, 1, 0 )
+margin_left = 838.0
+margin_top = 80.0
+margin_right = 1012.0
+margin_bottom = 335.0
+custom_fonts/font = SubResource( 25 )
+
+[connection signal="pressed" from="CanvasLayer/PlayersButton" to="." method="_on_PlayersButton_pressed"]

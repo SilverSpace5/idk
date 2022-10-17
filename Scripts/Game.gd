@@ -23,6 +23,7 @@ var protected = [
 ]
 var waterAlpha = 0
 var lavaAlpha = 0
+var playersAlpha = 0
 
 export var saving = true
 export var loading = true
@@ -210,6 +211,9 @@ func _process(delta):
 		lavaAlpha = 0.35
 	else:
 		lavaAlpha = 0
+		
+	$CanvasLayer/Players.modulate.a += (playersAlpha - $CanvasLayer/Players.modulate.a)/5
+	$CanvasLayer/PlayerBG.modulate.a += (playersAlpha - $CanvasLayer/PlayerBG.modulate.a)/5
 	
 	$CanvasLayer/Water.color.a += (waterAlpha - $CanvasLayer/Water.color.a)/10
 	$CanvasLayer/Lava.color.a += (lavaAlpha - $CanvasLayer/Lava.color.a)/10
@@ -259,8 +263,10 @@ func _process(delta):
 	if zoom < 0.1:
 		zoom = 0.1
 	if not godmode:
-		zoom = clamp(zoom, 0.1, 2.5)
+		zoom = clamp(zoom, 0.1, 2.25)
 	$Camera2D.zoom = Vector2(zoom, zoom)
+	$Camera2D/Offset.scale.x = zoom*0.8
+	$Camera2D/Offset.scale.y = zoom*0.8
 	
 	for i in range(10):
 		if Input.is_action_just_pressed("hotbar" + str(i)):
@@ -380,6 +386,8 @@ func _ready():
 		hotbarAmount.pop_front()
 	
 	#$MeshInstance2D.scale = Vector2(99999999, 99999999)
+	
+	$CanvasLayer/Players.add_item(Network.databaseData["username"], null, false)
 	
 	Global.player = Network.instance_player(Network.id, Vector2(Network.databaseData["pos"][0], Network.databaseData["pos"][1]))
 	$Camera2D.position = Global.player.position
@@ -579,3 +587,10 @@ func generateWorld(userdata):
 		y += 1
 		if Global.getRandom(0, 100, i+y) <= 25:
 			setBlock(Vector2(pos.x-1, pos.y+1), 3)
+
+
+func _on_PlayersButton_pressed():
+	if playersAlpha == 0:
+		playersAlpha = 1
+	else:
+		playersAlpha = 0

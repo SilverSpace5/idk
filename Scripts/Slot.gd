@@ -32,8 +32,6 @@ func _process(delta):
 		$CanvasLayer/Amount.visible = true
 		$Item.set_cell(-1, -1, item)
 	
-	$CanvasLayer.offset = global_position
-	$CanvasLayer.scale = global_scale
 	if amount != 1:
 		$CanvasLayer/Amount.text = str(amount)
 	else:
